@@ -9,7 +9,7 @@
             @include('layouts.partials.ad-bar')
         @endif
         <header class="transition-all duration-300 px-3 md:px-4 pt-0">
-            <div class="max-w-7xl mx-auto h-14 md:h-16 transition-all duration-300 flex items-center justify-between gap-4 px-4 sm:px-6 md:px-8 nav-bar-inner {{ $isHeroPage ? 'nav-bar-over-hero rounded-t-none rounded-b-xl' : 'nav-bar-solid rounded-xl' }}"
+            <div class="max-w-7xl mx-auto h-14 md:h-16 transition-all duration-300 flex items-center justify-between gap-4 px-4 sm:px-6 md:px-8 nav-bar-inner relative {{ $isHeroPage ? 'nav-bar-over-hero rounded-t-none rounded-b-xl' : 'nav-bar-solid rounded-xl' }}"
              :class="(isHeroPage && !atTop) ? 'nav-bar-solid rounded-xl' : ''">
             {{-- Left: Logo (icon + wordmark) – white + shadow when over hero for contrast --}}
             <a href="{{ route('home') }}" class="flex items-center gap-2.5 shrink-0 nav-logo">
@@ -120,6 +120,7 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
             </div>
+            <div class="snow-navbar-trim" aria-hidden="true"></div>
         </div>
         </header>
     </div>

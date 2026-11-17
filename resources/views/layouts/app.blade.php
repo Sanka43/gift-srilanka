@@ -90,6 +90,7 @@
         @if(request()->routeIs('home') || request()->routeIs('shop.index'))
             @include('layouts.partials.customer-chat')
         @endif
+        @include('layouts.partials.snow')
         @stack('structured-data')
     </body>
 </html>

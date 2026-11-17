@@ -1,10 +1,40 @@
 import './bootstrap';
+import { initSnowfall } from './snow';
 
 import Alpine from 'alpinejs';
 import intersect from '@alpinejs/intersect';
 
 window.Alpine = Alpine;
 Alpine.plugin(intersect);
+
+Alpine.data('snowThemeController', () => ({
+    enabled: true,
+    init() {
+        this.updateState();
+        window.addEventListener('snow:changed', (e) => {
+            this.enabled = e.detail.enabled;
+        });
+    },
+    updateState() {
+        if (window.GiftSriLankaSnow) {
+            this.enabled = window.GiftSriLankaSnow.enabled;
+        } else {
+            const stored = localStorage.getItem('giftsrilanka_snow_enabled');
+            this.enabled = stored !== null ? stored === 'true' : true;
+        }
+    },
+    toggle() {
+        if (window.GiftSriLankaSnow) {
+            window.GiftSriLankaSnow.toggle();
+        } else {
+            window.dispatchEvent(new CustomEvent('snow:toggle'));
+        }
+        this.updateState();
+    }
+}));
+
+// Initialize Snow Theme
+initSnowfall();
 
 Alpine.data('heroSection', () => ({}));
 

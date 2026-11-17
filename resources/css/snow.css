@@ -1,0 +1,132 @@
+/**
+ * GiftSriLanka - Snow Theme & Festive Accents
+ */
+
+/* 1. Snowfall Canvas Layer */
+.snowfall-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 55;
+    transition: opacity 0.4s ease;
+}
+
+/* 2. Snow Theme Active Elements */
+.snow-theme-active .snow-cap-header {
+    display: block;
+}
+
+/* Navbar festive snow trim */
+.snow-navbar-trim {
+    display: none;
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background-image: radial-gradient(circle at 10px 0, rgba(255, 255, 255, 0.95) 7px, transparent 8px);
+    background-size: 20px 8px;
+    background-repeat: repeat-x;
+    pointer-events: none;
+    z-index: 30;
+    opacity: 0.9;
+    filter: drop-shadow(0 2px 3px rgba(186, 230, 253, 0.4));
+}
+
+.snow-theme-active .snow-navbar-trim {
+    display: block;
+}
+
+/* Snowflake spin & pulse animations */
+@keyframes snowGentlySway {
+    0%, 100% {
+        transform: rotate(0deg) scale(1);
+    }
+    50% {
+        transform: rotate(15deg) scale(1.08);
+    }
+}
+
+@keyframes snowSparkle {
+    0%, 100% {
+        opacity: 0.85;
+        filter: drop-shadow(0 0 2px rgba(186, 230, 253, 0.8));
+    }
+    50% {
+        opacity: 1;
+        filter: drop-shadow(0 0 6px rgba(125, 211, 252, 1));
+    }
+}
+
+.animate-snow-sway {
+    animation: snowGentlySway 3s ease-in-out infinite;
+}
+
+.animate-snow-sparkle {
+    animation: snowSparkle 2s ease-in-out infinite;
+}
+
+/* Floating Snow Theme Pill (Bottom Left) */
+.snow-toggle-floating {
+    position: fixed;
+    bottom: 1.25rem;
+    left: 1rem;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.875rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(224, 242, 254, 0.9);
+    box-shadow: 0 4px 14px 0 rgba(14, 165, 233, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.04);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #0f172a;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+    user-select: none;
+}
+
+.snow-toggle-floating:hover {
+    transform: translateY(-2px) scale(1.02);
+    background: #ffffff;
+    box-shadow: 0 8px 20px 0 rgba(14, 165, 233, 0.2), 0 4px 8px 0 rgba(0, 0, 0, 0.06);
+    border-color: rgba(56, 189, 248, 0.8);
+}
+
+.snow-toggle-floating.is-active {
+    background: linear-gradient(135deg, rgba(240, 249, 255, 0.95), rgba(255, 255, 255, 0.95));
+    border-color: #38bdf8;
+    color: #0284c7;
+}
+
+.snow-toggle-floating .snow-indicator-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background-color: #38bdf8;
+    box-shadow: 0 0 6px #38bdf8;
+    transition: all 0.2s ease;
+}
+
+.snow-toggle-floating.is-inactive .snow-indicator-dot {
+    background-color: #cbd5e1;
+    box-shadow: none;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    .snowfall-canvas {
+        display: none !important;
+    }
+    .animate-snow-sway,
+    .animate-snow-sparkle {
+        animation: none !important;
+    }
+}

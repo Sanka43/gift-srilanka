@@ -84,5 +84,6 @@
                 </div>
             </div>
         </div>
+        @include('layouts.partials.snow')
     </body>
 </html>
