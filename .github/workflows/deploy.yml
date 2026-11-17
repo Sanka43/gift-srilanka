@@ -36,17 +36,26 @@ jobs:
           npm ci
           npm run build
 
-      - name: 🚀 Deploy via Rsync over SSH
-        uses: easingthemes/ssh-deploy@v5.1.0
+      - name: 🔑 Setup SSH Agent (Supports Encrypted Keys with Passphrase)
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          SSH_PRIVATE_KEY: ${{ secrets.CPANEL_SSH_KEY }}
-          ARGS: "-rlgoDzvc -i --delete"
-          SOURCE: "/"
-          REMOTE_HOST: ${{ secrets.CPANEL_HOST }}
-          REMOTE_USER: ${{ secrets.CPANEL_USER }}
-          REMOTE_PORT: ${{ secrets.CPANEL_PORT || '22' }}
-          TARGET: ${{ secrets.CPANEL_TARGET_PATH }}
-          EXCLUDE: "/node_modules/, /.git/, /.github/, /.env, /storage/app/public/, /storage/logs/, /tests/"
+          ssh-private-key: ${{ secrets.CPANEL_SSH_KEY }}
+          ssh-passphrase: ${{ secrets.CPANEL_SSH_PASSPHRASE }}
+
+      - name: 🚀 Deploy via Rsync over SSH
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p ${{ secrets.CPANEL_PORT || 22 }} ${{ secrets.CPANEL_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+          rsync -rlgoDzvc --delete \
+            --exclude="/node_modules" \
+            --exclude="/.git" \
+            --exclude="/.github" \
+            --exclude="/.env" \
+            --exclude="/storage/app/public" \
+            --exclude="/storage/logs" \
+            --exclude="/tests" \
+            -e "ssh -p ${{ secrets.CPANEL_PORT || 22 }}" \
+            ./ ${{ secrets.CPANEL_USER }}@${{ secrets.CPANEL_HOST }}:${{ secrets.CPANEL_TARGET_PATH }}
 
       - name: ⚡ Run Artisan & Optimization Commands on cPanel
         uses: appleboy/ssh-action@v1.0.3
@@ -54,6 +63,7 @@ jobs:
           host: ${{ secrets.CPANEL_HOST }}
           username: ${{ secrets.CPANEL_USER }}
           key: ${{ secrets.CPANEL_SSH_KEY }}
+          passphrase: ${{ secrets.CPANEL_SSH_PASSPHRASE }}
           port: ${{ secrets.CPANEL_PORT || 22 }}
           script: |
             cd ${{ secrets.CPANEL_TARGET_PATH }}
