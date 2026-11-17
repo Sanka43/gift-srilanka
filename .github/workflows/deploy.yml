@@ -36,11 +36,10 @@ jobs:
           npm ci
           npm run build
 
-      - name: 🔑 Setup SSH Agent (Supports Encrypted Keys with Passphrase)
+      - name: 🔑 Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.CPANEL_SSH_KEY }}
-          ssh-passphrase: ${{ secrets.CPANEL_SSH_PASSPHRASE }}
 
       - name: 🚀 Deploy via Rsync over SSH
         run: |
@@ -63,7 +62,6 @@ jobs:
           host: ${{ secrets.CPANEL_HOST }}
           username: ${{ secrets.CPANEL_USER }}
           key: ${{ secrets.CPANEL_SSH_KEY }}
-          passphrase: ${{ secrets.CPANEL_SSH_PASSPHRASE }}
           port: ${{ secrets.CPANEL_PORT || 22 }}
           script: |
             cd ${{ secrets.CPANEL_TARGET_PATH }}
