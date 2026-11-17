@@ -43,9 +43,7 @@ jobs:
 
       - name: 🚀 Deploy via Rsync over SSH
         run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -p ${{ secrets.CPANEL_PORT || 22 }} ${{ secrets.CPANEL_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
-          rsync -rlgoDzvc --delete \
+          rsync -avz --delete \
             --exclude="/node_modules" \
             --exclude="/.git" \
             --exclude="/.github" \
@@ -53,7 +51,8 @@ jobs:
             --exclude="/storage/app/public" \
             --exclude="/storage/logs" \
             --exclude="/tests" \
-            -e "ssh -p ${{ secrets.CPANEL_PORT || 22 }}" \
+            --rsync-path="mkdir -p ${{ secrets.CPANEL_TARGET_PATH }} && rsync" \
+            -e "ssh -p ${{ secrets.CPANEL_PORT || 22 }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
             ./ ${{ secrets.CPANEL_USER }}@${{ secrets.CPANEL_HOST }}:${{ secrets.CPANEL_TARGET_PATH }}
 
       - name: ⚡ Run Artisan & Optimization Commands on cPanel
