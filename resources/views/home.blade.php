@@ -38,7 +38,7 @@
         <div class="hero-content-inner max-w-2xl max-md:max-w-[min(100%,22rem)] max-md:mx-auto max-md:w-full max-md:flex max-md:flex-col max-md:items-center max-md:text-center">
             <p class="hero-anim-item text-xs sm:text-sm font-semibold tracking-[0.2em] uppercase text-amber-200/90 mb-4 max-md:hidden">Premium Gifts for Every Occasion</p>
             <h1 class="hero-anim-item hero-anim-delay-1 font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-[1.08] tracking-tight text-white drop-shadow-lg max-md:text-[1.75rem] max-md:leading-tight max-md:tracking-tight max-md:text-center">
-                Gift Happiness,<br class="max-md:block sm:hidden"><br class="hidden sm:block"> Every Occasion
+                Season of Joy<br class="max-md:block sm:hidden"><br class="hidden sm:block"> of Gift Giving
             </h1>
             <p class="hero-anim-item hero-anim-delay-2 !hidden md:!block mt-6 text-base sm:text-lg text-stone-200/95 max-w-lg leading-relaxed">
                 We deliver happiness across Colombo. Flowers, cakes, hampers & more—for birthdays, anniversaries & every celebration.
