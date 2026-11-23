@@ -72,10 +72,15 @@ class PayHereService
         $hash = $this->generateCheckoutHash($order->id, $amount, $this->currency);
 
         $nameParts = explode(' ', trim($order->customer_name ?: $order->full_name), 2);
-        $firstName = $nameParts[0] ?: 'Customer';
-        $lastName = $nameParts[1] ?? 'Customer';
+        $firstName = trim($nameParts[0] ?: 'Customer');
+        $lastName = trim($nameParts[1] ?? 'Customer');
 
         $itemsSummary = "Order #{$order->id} from " . config('app.name', 'Gifts Sri Lanka');
+
+        $cleanAddress = trim(preg_replace('/\s+/', ' ', (string) ($order->address ?: 'Colombo')));
+        $cleanCity = trim(preg_replace('/\s+/', ' ', (string) ($order->district ?: 'Colombo')));
+        $cleanPhone = trim(preg_replace('/[^0-9+]/', '', (string) ($order->phone ?: '0770000000')));
+        $cleanEmail = trim((string) ($order->customer_email ?: (auth()->user()?->email ?? 'customer@example.com')));
 
         return [
             'merchant_id' => $this->merchantId,
@@ -88,10 +93,10 @@ class PayHereService
             'amount' => $formattedAmount,
             'first_name' => $firstName,
             'last_name' => $lastName,
-            'email' => $order->customer_email ?: (auth()->user()?->email ?? 'customer@example.com'),
-            'phone' => $order->phone ?: '0000000000',
-            'address' => $order->address ?: 'Colombo',
-            'city' => $order->district ?: 'Colombo',
+            'email' => $cleanEmail,
+            'phone' => $cleanPhone,
+            'address' => $cleanAddress,
+            'city' => $cleanCity,
             'country' => 'Sri Lanka',
             'hash' => $hash,
         ];

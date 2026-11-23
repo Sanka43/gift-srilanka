@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Redirecting to Payment')
+@section('title', 'Connecting to Payment')
 @section('noindex', '1')
 
 @section('content')
@@ -22,30 +22,34 @@
             <span class="font-bold text-stone-900">Rs. {{ number_format($order->total_amount, 2) }}</span>.
         </p>
 
-        <!-- Hidden PayHere Auto-Submit Form -->
+        @if(empty($payload['merchant_id']))
+            <div class="mb-5 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs text-left">
+                <p class="font-bold mb-1">PayHere Configuration Notice:</p>
+                <p><code>PAYHERE_MERCHANT_ID</code> is not set in your <code>.env</code> file. Please configure your PayHere credentials on the server and refresh.</p>
+            </div>
+        @endif
+
+        <!-- PayHere Checkout Form -->
         <form id="payhere_form" action="{{ $checkoutUrl }}" method="POST">
             @foreach ($payload as $key => $value)
                 <input type="hidden" name="{{ $key }}" value="{{ $value }}">
             @endforeach
 
-            <noscript>
-                <button type="submit" class="w-full py-3 px-4 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold shadow-md transition-all">
-                    Proceed to PayHere
+            <div class="mt-2">
+                <button type="submit" class="w-full py-3.5 px-6 rounded-2xl bg-primary-600 hover:bg-primary-700 active:scale-[0.99] text-white font-semibold text-sm shadow-soft transition-all flex items-center justify-center gap-2">
+                    <span>Continue to PayHere Payment</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                    </svg>
                 </button>
-            </noscript>
+            </div>
         </form>
 
-        <div class="mt-4 pt-4 border-t border-stone-100">
-            <p class="text-xs text-stone-400 mb-3">If you are not redirected automatically within 5 seconds:</p>
-            <button type="button" onclick="document.getElementById('payhere_form').submit();" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-stone-200 text-xs font-semibold text-stone-700 hover:bg-stone-50 transition-all">
-                <span>Click here to continue</span>
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                </svg>
-            </button>
-        </div>
+        <p class="mt-4 text-xs text-stone-400">
+            If you are not redirected automatically in a moment, click the button above.
+        </p>
 
-        <div class="mt-6 flex items-center justify-center gap-2 text-[11px] text-stone-400">
+        <div class="mt-6 flex items-center justify-center gap-2 text-[11px] text-stone-400 border-t border-stone-100 pt-4">
             <svg class="w-4 h-4 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
             </svg>
@@ -55,13 +59,25 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        setTimeout(function () {
+    (function () {
+        @if(!empty($payload['merchant_id']))
+        function submitPayHere() {
             var form = document.getElementById('payhere_form');
-            if (form) {
+            if (form && !form.dataset.submitted) {
+                form.dataset.submitted = 'true';
                 form.submit();
             }
-        }, 800);
-    });
+        }
+
+        // Run immediately after rendering
+        setTimeout(submitPayHere, 200);
+
+        // Fallbacks
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', submitPayHere);
+        }
+        window.addEventListener('load', submitPayHere);
+        @endif
+    })();
 </script>
 @endsection
