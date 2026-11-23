@@ -2,6 +2,7 @@
     $nav = [
         ['route' => 'admin.dashboard', 'label' => 'Dashboard', 'icon' => 'dashboard'],
         ['route' => 'admin.orders.index', 'label' => 'Orders', 'icon' => 'orders'],
+        ['route' => 'admin.payments.index', 'label' => 'Payments', 'icon' => 'credit-card'],
         ['route' => 'admin.products.index', 'label' => 'Products', 'icon' => 'products'],
         ['route' => 'admin.categories.index', 'label' => 'Categories', 'icon' => 'categories'],
         ['route' => 'admin.customers.index', 'label' => 'Customers', 'icon' => 'customers'],

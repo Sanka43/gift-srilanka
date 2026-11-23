@@ -26,6 +26,10 @@ Route::prefix('admin')
         Route::get('orders/export', [App\Http\Controllers\Admin\OrderController::class, 'exportCsv'])->name('orders.export');
         Route::resource('orders', App\Http\Controllers\Admin\OrderController::class)->only(['index', 'show', 'edit', 'update']);
 
+        Route::get('payments/export', [App\Http\Controllers\Admin\PaymentController::class, 'exportCsv'])->name('payments.export');
+        Route::patch('payments/{order}/status', [App\Http\Controllers\Admin\PaymentController::class, 'updateStatus'])->name('payments.updateStatus');
+        Route::get('payments', [App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('payments.index');
+
         Route::get('customers', [App\Http\Controllers\Admin\CustomerController::class, 'index'])->name('customers.index');
         Route::get('contacts', [App\Http\Controllers\Admin\ContactController::class, 'index'])->name('contacts.index');
         Route::get('contacts/{contact}', [App\Http\Controllers\Admin\ContactController::class, 'show'])->name('contacts.show');
