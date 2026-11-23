@@ -45,7 +45,7 @@
             <div class="lg:col-span-3 rounded-2xl bg-danger-50 border border-danger-200 text-danger-700 px-5 py-4 font-medium">{{ $message }}</div>
         @enderror
 
-        <div class="lg:col-span-2 space-y-6">
+        <div class="lg:col-span-2 space-y-6" x-data="{ paymentMethod: '{{ old('payment_method', 'online') }}' }">
             <div class="rounded-3xl bg-white border border-stone-200 shadow-soft p-4 md:p-6">
                 <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                     <div class="flex items-center gap-2.5">
@@ -105,20 +105,40 @@
                     Payment Method
                 </h2>
                 <div class="space-y-3">
+                    <label class="flex items-start sm:items-center justify-between gap-3 p-4 rounded-2xl border-2 border-stone-200 cursor-pointer hover:border-primary-300 hover:bg-primary-50/30 transition-all duration-300 has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50/50">
+                        <div class="flex items-center gap-3">
+                            <input type="radio" name="payment_method" value="online" x-model="paymentMethod" {{ old('payment_method', 'online') === 'online' ? 'checked' : '' }} class="text-primary-500 focus:ring-primary-500">
+                            <div>
+                                <span class="font-semibold text-stone-800 block">Credit / Debit Card</span>
+                                <span class="text-xs text-stone-500">Instant & secure payment via PayHere (Visa, Mastercard, Amex)</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0 mt-1 sm:mt-0">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-blue-100 text-blue-700">VISA</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-800">Mastercard</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800">PayHere</span>
+                        </div>
+                    </label>
+
                     <label class="flex items-center gap-3 p-4 rounded-2xl border-2 border-stone-200 cursor-pointer hover:border-primary-300 hover:bg-primary-50/30 transition-all duration-300 has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50/50">
-                        <input type="radio" name="payment_method" value="cash_on_delivery" {{ old('payment_method', 'cash_on_delivery') === 'cash_on_delivery' ? 'checked' : '' }} class="text-primary-500 focus:ring-primary-500">
+                        <input type="radio" name="payment_method" value="cash_on_delivery" x-model="paymentMethod" {{ old('payment_method') === 'cash_on_delivery' ? 'checked' : '' }} class="text-primary-500 focus:ring-primary-500">
                         <div>
                             <span class="font-semibold text-stone-800 block">Bank transfer</span>
                             <span class="text-xs text-stone-500">Pay now and share your transfer slip on WhatsApp</span>
                         </div>
                     </label>
-                    <label class="flex items-center gap-3 p-4 rounded-2xl border-2 border-stone-200 bg-stone-100/80 cursor-not-allowed opacity-60 transition-all duration-300 select-none">
-                        <input type="radio" name="payment_method" value="online" disabled class="text-primary-500 focus:ring-primary-500 cursor-not-allowed">
-                        <span class="font-semibold text-stone-500">Online Payment</span>
-                        <span class="text-xs text-stone-400">(Coming soon)</span>
-                    </label>
                 </div>
                 @error('payment_method')<p class="text-danger-600 text-sm mt-1">{{ $message }}</p>@enderror
+
+                <div x-show="paymentMethod === 'online'" x-transition class="mt-4 p-4 rounded-2xl border border-primary-100 bg-primary-50/60 text-xs text-primary-900 flex items-start gap-2.5">
+                    <svg class="w-5 h-5 text-primary-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                    <div>
+                        <p class="font-semibold text-stone-800">Bank-grade Secure Card Checkout</p>
+                        <p class="text-stone-600 mt-0.5">When you click "Place Order", you will be securely redirected to PayHere to complete payment with 3D Secure OTP verification.</p>
+                    </div>
+                </div>
             </div>
 
             @php
@@ -131,7 +151,7 @@
                 $slipPhone = config('contact.phone');
                 $slipPhoneDigits = preg_replace('/\D+/', '', $slipPhone);
             @endphp
-            <div class="rounded-3xl bg-white border border-stone-200 shadow-soft p-5 md:p-7">
+            <div class="rounded-3xl bg-white border border-stone-200 shadow-soft p-5 md:p-7" x-show="paymentMethod === 'cash_on_delivery'" x-transition>
                 <h2 class="font-display text-lg font-semibold text-stone-800 mb-4 flex items-center gap-2">
                     <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 text-sm font-bold" aria-hidden="true">₨</span>
                     Bank transfer

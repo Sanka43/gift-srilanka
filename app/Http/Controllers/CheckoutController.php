@@ -37,12 +37,19 @@ class CheckoutController extends Controller
         if ($items->isEmpty()) {
             return redirect()->route('shop.index')->with('error', 'Your cart is empty.');
         }
+        $validated = $request->validated();
         $order = $this->orderService->createOrder(
             $this->cart->getCart()->all(),
-            $request->validated()
+            $validated
         );
         $this->cart->clear();
         session()->forget('checkout_token');
+
+        // If paying online via Card / Gateway, redirect to payment gateway
+        if (($validated['payment_method'] ?? '') === 'online') {
+            return redirect()->route('checkout.payment.pay', $order)
+                ->setStatusCode(303);
+        }
 
         try {
             Mail::to($order->customer_email)->queue(new OrderConfirmationMail($order));

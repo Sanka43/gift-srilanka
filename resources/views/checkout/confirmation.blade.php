@@ -29,8 +29,42 @@
             <dt class="text-stone-500">Total</dt>
             <dd class="font-semibold text-stone-800">LKR {{ number_format($order->total_amount, 2) }}</dd>
             <dt class="text-stone-500">Payment</dt>
-            <dd class="font-semibold text-stone-800">{{ $order->payment_method === 'online' ? 'Online (pending)' : 'Cash on Delivery' }}</dd>
+            <dd class="font-semibold text-stone-800">
+                @if($order->payment_method === 'online')
+                    @if($order->payment_status === 'paid')
+                        <span class="inline-flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200 text-xs font-semibold">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Paid via Card (PayHere)
+                        </span>
+                        @if($order->transaction_id)
+                            <span class="block text-[11px] text-stone-500 font-mono mt-0.5">Ref: {{ $order->transaction_id }}</span>
+                        @endif
+                    @elseif($order->payment_status === 'failed')
+                        <span class="inline-flex items-center gap-1 text-danger-700 bg-danger-50 px-2 py-0.5 rounded-lg border border-danger-200 text-xs font-semibold">
+                            Payment Failed
+                        </span>
+                    @else
+                        <span class="inline-flex items-center gap-1 text-amber-700 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200 text-xs font-semibold">
+                            Processing
+                        </span>
+                    @endif
+                @else
+                    Bank Transfer
+                @endif
+            </dd>
         </dl>
+
+        @if($order->payment_method === 'online' && $order->payment_status !== 'paid' && $order->status !== \App\Models\Order::STATUS_CANCELLED)
+            <div class="mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm flex items-center justify-between gap-4">
+                <div>
+                    <p class="font-semibold text-amber-900">Payment not completed?</p>
+                    <p class="text-xs text-amber-800">If your payment window was closed, you can retry checkout now.</p>
+                </div>
+                <a href="{{ route('checkout.payment.pay', $order) }}" class="shrink-0 px-4 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold shadow-sm transition">
+                    Complete Payment
+                </a>
+            </div>
+        @endif
 
         <h3 class="font-display font-semibold text-stone-800 mt-6 mb-2">Items</h3>
         <ul class="divide-y divide-stone-200">
@@ -43,7 +77,13 @@
         </ul>
     </div>
 
-    <p class="mt-6 text-center text-stone-500 text-sm">We'll contact you for delivery. For online payment, you will receive payment instructions separately.</p>
+    <p class="mt-6 text-center text-stone-500 text-sm">
+        @if($order->payment_method === 'online')
+            A confirmation receipt and order details have been sent to your email.
+        @else
+            Please transfer the amount using the bank details provided and send the slip to our WhatsApp.
+        @endif
+    </p>
     <div class="mt-6 flex flex-wrap justify-center gap-4">
         <a href="{{ route('shop.index') }}" class="inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-primary-500 text-white font-semibold hover:bg-primary-600 shadow-soft transition">Continue Shopping</a>
         @auth

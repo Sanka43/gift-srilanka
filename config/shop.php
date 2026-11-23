@@ -21,4 +21,16 @@ return [
         'account_name' => env('BANK_ACCOUNT_NAME', 'Southern Turn Networks'),
         'account_number' => env('BANK_ACCOUNT_NUMBER', '115511287806'),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | PayHere Payment Gateway Settings
+    |--------------------------------------------------------------------------
+    */
+    'payhere' => [
+        'merchant_id' => env('PAYHERE_MERCHANT_ID', ''),
+        'merchant_secret' => env('PAYHERE_MERCHANT_SECRET', ''),
+        'sandbox' => filter_var(env('PAYHERE_SANDBOX', false), FILTER_VALIDATE_BOOLEAN),
+        'currency' => env('PAYHERE_CURRENCY', 'LKR'),
+    ],
 ];

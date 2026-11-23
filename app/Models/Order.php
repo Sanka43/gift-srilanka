@@ -39,6 +39,9 @@ class Order extends Model
         'status',
         'payment_method',
         'payment_status',
+        'transaction_id',
+        'payment_gateway',
+        'payment_meta',
         'estimated_delivery_date',
         'cancel_requested',
     ];
@@ -56,6 +59,7 @@ class Order extends Model
             'delivery_time' => 'string',
             'estimated_delivery_date' => 'date',
             'cancel_requested' => 'boolean',
+            'payment_meta' => 'array',
         ];
     }
 

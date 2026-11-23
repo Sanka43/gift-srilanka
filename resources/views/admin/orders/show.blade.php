@@ -34,8 +34,14 @@
         <div class="admin-card bg-white dark:bg-stone-800/90 rounded-xl border border-stone-200 dark:border-stone-700 p-6">
             <h3 class="font-semibold text-stone-800 dark:text-stone-100 mb-3">Payment</h3>
             <dl class="space-y-2 text-sm text-stone-700 dark:text-stone-200">
-                <div><dt class="text-stone-500 dark:text-stone-400">Method</dt><dd>{{ $order->payment_method === 'online' ? 'Online' : 'Cash on Delivery' }}</dd></div>
+                <div><dt class="text-stone-500 dark:text-stone-400">Method</dt><dd>{{ $order->payment_method === 'online' ? 'Online (PayHere Card)' : 'Cash on Delivery' }}</dd></div>
                 <div><dt class="text-stone-500 dark:text-stone-400">Payment status</dt><dd><span class="px-2 py-1 text-xs rounded-full {{ $order->payment_status === 'paid' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' }}">{{ ucfirst($order->payment_status) }}</span></dd></div>
+                @if($order->transaction_id)
+                    <div><dt class="text-stone-500 dark:text-stone-400">Transaction ID</dt><dd class="font-mono text-xs">{{ $order->transaction_id }}</dd></div>
+                @endif
+                @if($order->payment_gateway)
+                    <div><dt class="text-stone-500 dark:text-stone-400">Gateway</dt><dd class="text-xs uppercase font-semibold text-primary-600">{{ $order->payment_gateway }}</dd></div>
+                @endif
                 <div><dt class="text-stone-500 dark:text-stone-400">Total</dt><dd class="font-bold text-lg text-stone-900 dark:text-stone-100">LKR {{ number_format($order->total_amount, 2) }}</dd></div>
                 @if($order->estimated_delivery_date)
                     <div><dt class="text-stone-500 dark:text-stone-400">Est. delivery</dt><dd>{{ $order->estimated_delivery_date->format('Y-m-d') }}</dd></div>

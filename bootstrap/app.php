@@ -33,6 +33,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\EnsureUserHasRole::class,
         ]);
 
+        // Exempt external payment gateway webhooks from CSRF verification
+        $middleware->validateCsrfTokens(except: [
+            'payment/payhere/notify',
+        ]);
+
         $middleware->append(\App\Http\Middleware\SecurityHeadersMiddleware::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {

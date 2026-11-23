@@ -87,7 +87,25 @@
             @if($order->special_note)
                 <div class="sm:col-span-2"><dt class="text-stone-500">Special note</dt><dd class="font-medium whitespace-pre-line">{{ $order->special_note }}</dd></div>
             @endif
-            <div><dt class="text-stone-500">Payment</dt><dd><span class="px-2 py-1 text-xs rounded-full {{ $order->payment_status === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }}">{{ ucfirst($order->payment_status) }}</span> · {{ $order->payment_method === 'online' ? 'Online' : 'Cash on Delivery' }}</dd></div>
+            <div>
+                <dt class="text-stone-500">Payment</dt>
+                <dd>
+                    <span class="px-2 py-1 text-xs rounded-full {{ $order->payment_status === 'paid' ? 'bg-emerald-100 text-emerald-800' : ($order->payment_status === 'failed' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800') }}">
+                        {{ ucfirst($order->payment_status) }}
+                    </span>
+                    · {{ $order->payment_method === 'online' ? 'Card (PayHere)' : 'Bank Transfer' }}
+                    @if($order->transaction_id)
+                        <span class="block text-xs text-stone-500 font-mono mt-0.5">Ref: {{ $order->transaction_id }}</span>
+                    @endif
+                    @if($order->payment_method === 'online' && $order->payment_status !== 'paid' && $order->status !== \App\Models\Order::STATUS_CANCELLED)
+                        <div class="mt-2">
+                            <a href="{{ route('checkout.payment.pay', $order) }}" class="inline-flex items-center gap-1.5 px-3 py-1 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-xs font-semibold shadow-sm transition">
+                                Pay Now
+                            </a>
+                        </div>
+                    @endif
+                </dd>
+            </div>
             <div><dt class="text-stone-500">Date</dt><dd class="font-medium">{{ $order->created_at->format('M d, Y H:i') }}</dd></div>
         </dl>
         @if($order->status === 'pending' && !$order->cancel_requested)

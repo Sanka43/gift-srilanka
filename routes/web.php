@@ -5,6 +5,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatAttachmentController;
 use App\Http\Controllers\CustomerChatController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
@@ -52,7 +53,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
     Route::get('/checkout/confirmation/{order}', [CheckoutController::class, 'confirmation'])->name('checkout.confirmation');
+    Route::get('/checkout/payment/{order}', [PaymentController::class, 'pay'])->name('checkout.payment.pay');
+    Route::get('/checkout/payment/return/{order}', [PaymentController::class, 'return'])->name('checkout.payment.return');
+    Route::get('/checkout/payment/cancel/{order}', [PaymentController::class, 'cancel'])->name('checkout.payment.cancel');
 });
+
+// PayHere Server-to-Server IPN Webhook (Exempt from CSRF in bootstrap/app.php)
+Route::post('/payment/payhere/notify', [PaymentController::class, 'notify'])->name('payment.payhere.notify');
 
 // Signed URL: <img> requests do not always send session cookies like XHR; signature replaces auth for GET.
 Route::get('/chat/messages/{message}/attachment', ChatAttachmentController::class)
