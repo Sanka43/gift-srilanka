@@ -21,14 +21,15 @@ class SecurityHeadersMiddleware
         $vite = $this->viteCspSources();
         $csp = implode('; ', [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com{$vite['script']}",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.payhere.lk https://sandbox.payhere.lk{$vite['script']}",
             "style-src 'self' 'unsafe-inline' https:{$vite['style']}",
             "img-src 'self' data: https: blob: https://www.google-analytics.com",
             "font-src 'self' https: data:{$vite['font']}",
             "connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com{$vite['connect']}",
             "frame-ancestors 'self'",
+            "frame-src 'self' https://www.payhere.lk https://sandbox.payhere.lk",
             "base-uri 'self'",
-            "form-action 'self'",
+            "form-action 'self' https://www.payhere.lk https://sandbox.payhere.lk",
         ]);
         $response->headers->set('Content-Security-Policy', $csp);
 
