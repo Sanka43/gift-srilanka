@@ -19,7 +19,7 @@ class CartController extends Controller
     {
         $items = $this->cart->itemsWithProducts();
         $subtotal = $this->cart->total();
-        $deliveryCharge = (float) config('shop.delivery_charge', 350);
+        $deliveryCharge = app(\App\Services\DeliveryFeeService::class)->defaultCharge();
         $discount = 0;
         $total = round($subtotal + $deliveryCharge - $discount, 2);
         return view('cart.index', compact('items', 'subtotal', 'deliveryCharge', 'discount', 'total'));

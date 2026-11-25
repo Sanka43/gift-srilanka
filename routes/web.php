@@ -40,7 +40,7 @@ Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name
 Route::post('/products/{product}/notify-when-available', [NotifyWhenAvailableController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('notify.when-available');
-Route::middleware('auth')->post('/review/{product}', [ReviewController::class, 'store'])->name('review.store');
+Route::middleware(['auth', 'throttle:6,1'])->post('/review/{product}', [ReviewController::class, 'store'])->name('review.store');
 
 // Cart (public, session-based)
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
@@ -52,6 +52,7 @@ Route::delete('/cart/remove/{product}', [CartController::class, 'remove'])->midd
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+    Route::post('/checkout/delivery-quote', [CheckoutController::class, 'quote'])->middleware('throttle:30,1')->name('checkout.quote');
     Route::get('/checkout/confirmation/{order}', [CheckoutController::class, 'confirmation'])->name('checkout.confirmation');
     Route::get('/checkout/payment/{order}', [PaymentController::class, 'pay'])->name('checkout.payment.pay');
     Route::get('/checkout/payment/return/{order}', [PaymentController::class, 'return'])->name('checkout.payment.return');

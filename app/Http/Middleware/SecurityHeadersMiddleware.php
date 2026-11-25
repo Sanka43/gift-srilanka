@@ -16,16 +16,16 @@ class SecurityHeadersMiddleware
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('X-XSS-Protection', '1; mode=block');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
-        $response->headers->set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+        $response->headers->set('Permissions-Policy', 'geolocation=(self), microphone=(), camera=()');
 
         $vite = $this->viteCspSources();
         $csp = implode('; ', [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.payhere.lk https://sandbox.payhere.lk{$vite['script']}",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.payhere.lk https://sandbox.payhere.lk https://unpkg.com https://maps.googleapis.com{$vite['script']}",
             "style-src 'self' 'unsafe-inline' https:{$vite['style']}",
             "img-src 'self' data: https: blob: https://www.google-analytics.com",
             "font-src 'self' https: data:{$vite['font']}",
-            "connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com{$vite['connect']}",
+            "connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://nominatim.openstreetmap.org https://maps.googleapis.com{$vite['connect']}",
             "frame-ancestors 'self'",
             "frame-src 'self' https://www.payhere.lk https://sandbox.payhere.lk",
             "base-uri 'self'",

@@ -17,6 +17,12 @@
                 <div><dt class="text-stone-500 dark:text-stone-400">Phone</dt><dd>{{ $order->phone }}</dd></div>
                 <div><dt class="text-stone-500 dark:text-stone-400">District</dt><dd>{{ $order->district }}</dd></div>
                 <div><dt class="text-stone-500 dark:text-stone-400">Address</dt><dd>{{ $order->address }}</dd></div>
+                @if($order->delivery_lat !== null && $order->delivery_lng !== null)
+                    <div><dt class="text-stone-500 dark:text-stone-400">Pinned location</dt><dd>
+                        <a href="https://www.google.com/maps/dir/?api=1&destination={{ $order->delivery_lat }},{{ $order->delivery_lng }}" target="_blank" rel="noopener" class="text-primary-600 hover:underline">Open in Google Maps</a>
+                        @if($order->delivery_distance_km !== null)<span class="text-stone-500"> ({{ number_format($order->delivery_distance_km, 1) }} km)</span>@endif
+                    </dd></div>
+                @endif
                 @if($order->delivery_date)
                     <div><dt class="text-stone-500 dark:text-stone-400">Requested delivery</dt><dd>{{ $order->delivery_date->format('Y-m-d') }}</dd></div>
                 @endif

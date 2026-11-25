@@ -12,7 +12,9 @@ use Illuminate\Validation\ValidationException;
 class OrderService
 {
     public function __construct(
-        private PaymentService $paymentService
+        private PaymentService $paymentService,
+        private CacheService $cacheService,
+        private DeliveryFeeService $deliveryFee
     ) {}
 
     /**
@@ -44,10 +46,25 @@ class OrderService
             }
         }
 
-        $deliveryCharge = (float) config('shop.delivery_charge', 350);
+        // Always recalculated server-side from the pinned location; never trust a browser-sent charge.
+        $deliveryCharge = $this->deliveryFee->defaultCharge();
+        $geo = ['delivery_lat' => null, 'delivery_lng' => null, 'delivery_distance_km' => null];
+        if ($this->deliveryFee->isEnabled()) {
+            $quote = $this->deliveryFee->quote(
+                (float) $checkoutData['delivery_lat'],
+                (float) $checkoutData['delivery_lng'],
+                $this->calculateTotal($cartItems)
+            );
+            $deliveryCharge = $quote['charge'];
+            $geo = [
+                'delivery_lat' => round((float) $checkoutData['delivery_lat'], 7),
+                'delivery_lng' => round((float) $checkoutData['delivery_lng'], 7),
+                'delivery_distance_km' => $quote['distance_km'],
+            ];
+        }
         $paymentStatus = $this->paymentService->getInitialPaymentStatus($checkoutData['payment_method']);
 
-        return DB::transaction(function () use ($cartItems, $checkoutData, $products, $deliveryCharge, $paymentStatus) {
+        $order = DB::transaction(function () use ($cartItems, $checkoutData, $products, $deliveryCharge, $paymentStatus, $geo) {
             $subtotal = 0;
             foreach ($cartItems as $item) {
                 $product = $products->get($item['product_id']);
@@ -58,12 +75,12 @@ class OrderService
             $subtotal = round($subtotal, 2);
             $total = round($subtotal + $deliveryCharge, 2);
 
-            $order = Order::create([
+            $order = Order::create($geo + [
                 'user_id' => auth()->id(),
                 'full_name' => $checkoutData['full_name'],
                 'phone' => $checkoutData['phone'],
-                'address' => $checkoutData['address'],
-                'district' => $checkoutData['district'],
+                'address' => $checkoutData['address'] ?? '',
+                'district' => $checkoutData['district'] ?? '',
                 'delivery_date' => $checkoutData['delivery_date'] ?? null,
                 'delivery_time' => $checkoutData['delivery_time'] ?? null,
                 'special_note' => $checkoutData['special_note'] ?? null,
@@ -90,10 +107,18 @@ class OrderService
                     'price' => $price,
                 ]);
                 $product->decrement('stock', (int) $item['quantity']);
+                $newStock = $product->fresh()->stock;
+                if ($newStock <= 0) {
+                    $product->updateQuietly(['in_stock' => false]);
+                }
             }
 
             return $order;
         });
+
+        $this->cacheService->invalidateProductRelated();
+
+        return $order;
     }
 
     public function cancelOrder(Order $order, ?string $note = null): void
@@ -107,7 +132,13 @@ class OrderService
 
             foreach ($order->items as $item) {
                 if ($item->product_id && $item->quantity > 0) {
-                    Product::where('id', $item->product_id)->increment('stock', (int) $item->quantity);
+                    $prod = Product::find($item->product_id);
+                    if ($prod) {
+                        $prod->increment('stock', (int) $item->quantity);
+                        if ($prod->fresh()->stock > 0 && ! $prod->in_stock) {
+                            $prod->updateQuietly(['in_stock' => true]);
+                        }
+                    }
                 }
             }
 
@@ -121,6 +152,8 @@ class OrderService
                 'note' => $note ?? 'Order cancelled and stock restored.',
             ]);
         });
+
+        $this->cacheService->invalidateProductRelated();
     }
 
     public function calculateTotal(array|Collection $cartItems): float

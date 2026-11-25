@@ -34,7 +34,7 @@
         welcomeNote: @js(config('contact.chat_welcome_note') ?: 'Thanks for reaching out! Our team will get back to you here as soon as we can.'),
         guestAutoNote: @js(config('contact.chat_guest_auto_note')),
     })"
-    class="fixed bottom-5 right-4 z-[70] sm:bottom-6 sm:right-6"
+    class="fixed {{ request()->routeIs('checkout.index') ? 'bottom-24 lg:bottom-6' : 'bottom-5 sm:bottom-6' }} right-4 z-[70] sm:right-6"
 >
     <div x-show="open" x-cloak class="chat-panel mb-3 w-[calc(100vw-1.5rem)] max-w-[25rem] overflow-hidden">
         <div class="chat-panel-header border-b border-white/45 px-4 py-3.5">

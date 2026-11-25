@@ -14,14 +14,21 @@ class CheckoutRequest extends FormRequest
 
     public function rules(): array
     {
+        $mapDelivery = app(\App\Services\DeliveryFeeService::class)->isEnabled();
+
         return [
+            'delivery_lat' => [$mapDelivery ? 'required' : 'nullable', 'numeric', 'between:-90,90'],
+            'delivery_lng' => [$mapDelivery ? 'required' : 'nullable', 'numeric', 'between:-180,180'],
             'full_name' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:20'],
-            'address' => ['required', 'string'],
+            // With a map pin the address is just an optional landmark/house-number hint.
+            'address' => [$mapDelivery ? 'nullable' : 'required', 'string', 'max:1000'],
             'delivery_date' => ['nullable', 'date', 'after_or_equal:today'],
             'delivery_time' => ['nullable', 'date_format:H:i'],
             'special_note' => ['nullable', 'string', 'max:1000'],
-            'district' => ['required', 'string', 'max:100', Rule::in(config('shop.allowed_districts', ['Colombo']))],
+            'district' => $mapDelivery
+                ? ['nullable', 'string', 'max:100']
+                : ['required', 'string', 'max:100', Rule::in(config('shop.allowed_districts', ['Colombo']))],
             'payment_method' => ['required', 'in:cash_on_delivery,online'],
             'checkout_token' => [
                 'required',
@@ -41,6 +48,8 @@ class CheckoutRequest extends FormRequest
         $list = implode(', ', $districts);
 
         return [
+            'delivery_lat.required' => 'Please pin your delivery location on the map.',
+            'delivery_lng.required' => 'Please pin your delivery location on the map.',
             'district.in' => "We currently deliver to {$list} only. Please enter a valid district.",
         ];
     }

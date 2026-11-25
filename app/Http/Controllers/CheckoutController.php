@@ -6,8 +6,11 @@ use App\Mail\OrderConfirmationMail;
 use App\Http\Requests\CheckoutRequest;
 use App\Models\Order;
 use App\Services\CartService;
+use App\Services\DeliveryFeeService;
 use App\Services\OrderService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
@@ -15,7 +18,8 @@ class CheckoutController extends Controller
 {
     public function __construct(
         private CartService $cart,
-        private OrderService $orderService
+        private OrderService $orderService,
+        private DeliveryFeeService $delivery
     ) {}
 
     public function index(): View|RedirectResponse
@@ -26,9 +30,26 @@ class CheckoutController extends Controller
         }
         session()->put('checkout_token', \Illuminate\Support\Str::random(64));
         $subtotal = $this->cart->total();
-        $deliveryCharge = (float) config('shop.delivery_charge', 350);
+        $deliveryCharge = $this->delivery->defaultCharge();
         $total = round($subtotal + $deliveryCharge, 2);
-        return view('checkout.index', compact('items', 'subtotal', 'deliveryCharge', 'total'));
+        $deliverySettings = $this->delivery->settings();
+        return view('checkout.index', compact('items', 'subtotal', 'deliveryCharge', 'total', 'deliverySettings'));
+    }
+
+    public function quote(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'lat' => ['required', 'numeric', 'between:-90,90'],
+            'lng' => ['required', 'numeric', 'between:-180,180'],
+        ]);
+
+        $subtotal = (float) $this->cart->total();
+        $quote = $this->delivery->quote((float) $data['lat'], (float) $data['lng'], $subtotal);
+
+        return response()->json($quote + [
+            'subtotal' => $subtotal,
+            'total' => round($subtotal + $quote['charge'], 2),
+        ]);
     }
 
     public function store(CheckoutRequest $request): RedirectResponse
