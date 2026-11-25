@@ -75,11 +75,20 @@
             </div>
 
             {{-- Right: form section (full width on mobile, then form only + logo) --}}
-            <div class="flex-1 min-h-screen flex flex-col items-center justify-center p-6 sm:p-8 lg:p-10 max-md:px-5 max-md:py-6 max-md:justify-start max-md:pt-10 bg-stone-50">
-                {{-- Mobile: branding logo above form --}}
-                <a href="{{ route('home') }}" class="lg:hidden font-display font-semibold text-2xl max-md:text-xl text-[#1F2937] tracking-tight mb-8">GIFTSRILANKA</a>
+            <div class="flex-1 min-h-screen flex flex-col items-center lg:justify-center lg:p-10 bg-stone-50">
+                {{-- Mobile / tablet: branded hero header --}}
+                <div class="lg:hidden relative w-full flex-1 flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-[#052e16] via-[#0d4d2a] to-[#14532d] rounded-b-[2rem] px-6 pt-[max(2rem,env(safe-area-inset-top))] pb-20 sm:pb-24 text-center">
+                    <img src="{{ asset('images/login-hero.jpg') }}" alt="" class="absolute inset-0 w-full h-full object-cover object-center" aria-hidden="true" fetchpriority="high">
+                    <div class="absolute inset-0 bg-gradient-to-b from-[#052e16]/65 via-[#052e16]/55 to-[#052e16]/85" aria-hidden="true"></div>
+                    <div class="absolute inset-0 bg-[radial-gradient(ellipse_70%_45%_at_50%_45%,_rgba(3,25,12,0.55)_0%,_transparent_100%)]" aria-hidden="true"></div>
 
-                <div class="w-full max-w-[440px] max-md:max-w-full max-md:min-w-0">
+                    <a href="{{ route('home') }}" class="relative mx-auto block w-fit" aria-label="Gift Sri Lanka home">
+                        <img src="{{ asset('images/logo.png') }}" alt="Gift Sri Lanka" class="h-20 sm:h-24 w-auto drop-shadow-[0_4px_10px_rgba(0,0,0,0.55)] drop-shadow-[0_0_6px_rgba(255,255,255,0.9)]" width="300" height="80">
+                    </a>
+                    <h1 class="sr-only">{{ $headline ?? 'Welcome' }}</h1>
+                </div>
+
+                <div class="w-full max-w-[440px] max-lg:max-w-[480px] max-lg:-mt-10 max-lg:px-4 max-lg:pt-0 max-lg:pb-[max(2rem,env(safe-area-inset-bottom))] max-lg:shrink-0 relative z-10 lg:p-0 min-w-0">
                     {{ $slot }}
                 </div>
             </div>
