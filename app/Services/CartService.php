@@ -195,6 +195,13 @@ class CartService
             return;
         }
 
+        // Merge pending item if customer attempted to add to cart before signing in
+        $pendingItem = session()->get('pending_cart_item');
+        if (is_array($pendingItem) && ! empty($pendingItem['product_id']) && ! empty($pendingItem['quantity'])) {
+            $this->add((int) $pendingItem['product_id'], (int) $pendingItem['quantity']);
+            session()->forget('pending_cart_item');
+        }
+
         $sessionCart = collect(session(self::SESSION_KEY, []));
         if ($sessionCart->isEmpty()) {
             return;

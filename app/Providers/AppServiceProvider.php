@@ -170,6 +170,16 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Event::listen(Login::class, function (Login $event) {
+            try {
+                \App\Models\User::whereKey($event->user->getAuthIdentifier())->update([
+                    'last_login_at' => now(),
+                    'last_login_ip' => request()->ip(),
+                ]);
+            } catch (\Throwable $e) {
+                // Never block login if the column is missing (migration not yet run).
+                Log::warning('Could not record last login', ['message' => $e->getMessage()]);
+            }
+
             Log::info('User logged in', [
                 'user_id' => $event->user->id,
                 'ip' => request()->ip(),

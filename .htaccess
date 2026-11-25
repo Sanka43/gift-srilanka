@@ -2,7 +2,7 @@
     RewriteEngine On
 
     # Prevent direct access to sensitive files
-    <FilesMatch "^\.">
+    <FilesMatch "(^\.|error_log|\.log$|\.sql$|\.dump$|\.bak$|composer\.(json|lock)$|package(-lock)?\.json$)">
         Require all denied
     </FilesMatch>
 

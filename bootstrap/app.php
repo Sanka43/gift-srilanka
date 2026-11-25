@@ -38,6 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'payment/payhere/notify',
         ]);
 
+        $middleware->web(append: [\App\Http\Middleware\EnsureUserNotBlocked::class]);
         $middleware->append(\App\Http\Middleware\SecurityHeadersMiddleware::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {

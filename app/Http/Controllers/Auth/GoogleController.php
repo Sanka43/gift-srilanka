@@ -60,6 +60,10 @@ class GoogleController extends Controller
             $user->role_id = $customerRole->id;
         }
 
+        if ($user->exists && $user->isBlocked()) {
+            return redirect()->route('login')->withErrors(['email' => 'Your account has been blocked. Please contact support.']);
+        }
+
         $user->google_id = $google->getId();
         if (! $user->email_verified_at) {
             $user->email_verified_at = now();

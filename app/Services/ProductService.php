@@ -93,7 +93,7 @@ class ProductService
             if (! $file instanceof UploadedFile) {
                 continue;
             }
-            $path = $file->store('products', 'public');
+            $path = app(ImageOptimizer::class)->store($file, 'products', 1200, 82);
             $product->images()->create(['image_path' => $path]);
         }
     }

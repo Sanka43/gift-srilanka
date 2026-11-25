@@ -30,7 +30,7 @@
                 {{-- Deep luxury gradient: dark emerald to forest green --}}
                 <div class="absolute inset-0 bg-gradient-to-br from-[#052e16] via-[#0d4d2a] to-[#14532d]" aria-hidden="true"></div>
                 {{-- Subtle blurred gift image in corner (does not overpower text) --}}
-                <div class="absolute bottom-0 right-0 w-[85%] h-[75%] bg-cover bg-bottom-right bg-no-repeat opacity-[0.08] blur-[2px]" style="background-image: url('{{ asset('images/loginbg.png') }}'); background-position: 100% 100%;" aria-hidden="true"></div>
+                <div class="absolute bottom-0 right-0 w-[85%] h-[75%] bg-cover bg-bottom-right bg-no-repeat opacity-[0.08] blur-[2px]" style="background-image: url('{{ asset('images/loginbg.webp') }}'); background-position: 100% 100%;" aria-hidden="true"></div>
                 {{-- Very subtle gold light in one corner --}}
                 <div class="absolute top-0 right-0 w-[55%] h-[50%] bg-[radial-gradient(ellipse_at_top_right,_rgba(212,168,75,0.12)_0%,_transparent_60%)]" aria-hidden="true"></div>
                 {{-- Soft noise texture overlay for depth --}}

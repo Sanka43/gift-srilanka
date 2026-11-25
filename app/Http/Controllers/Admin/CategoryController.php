@@ -50,7 +50,7 @@ class CategoryController extends Controller
         $data['parent_id'] = $request->input('parent_id') ?: null;
 
         if ($request->hasFile('image')) {
-            $data['image_path'] = $request->file('image')->store('categories', 'public');
+            $data['image_path'] = app(\App\Services\ImageOptimizer::class)->store($request->file('image'), 'categories', 1000, 82);
         }
 
         Category::create($data);
@@ -81,7 +81,7 @@ class CategoryController extends Controller
             if ($category->image_path) {
                 Storage::disk('public')->delete($category->image_path);
             }
-            $data['image_path'] = $request->file('image')->store('categories', 'public');
+            $data['image_path'] = app(\App\Services\ImageOptimizer::class)->store($request->file('image'), 'categories', 1000, 82);
         }
 
         $category->update($data);

@@ -48,9 +48,11 @@ jobs:
             --exclude="/.git" \
             --exclude="/.github" \
             --exclude="/.env" \
-            --exclude="/storage/app/public" \
-            --exclude="/storage/logs" \
+            --exclude="/storage" \
             --exclude="/tests" \
+            --exclude="*.sql" \
+            --exclude="*.dump" \
+            --exclude="error_log" \
             --rsync-path="mkdir -p ${{ secrets.CPANEL_TARGET_PATH }} && rsync" \
             -e "ssh -p ${{ secrets.CPANEL_PORT || 22 }} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
             ./ ${{ secrets.CPANEL_USER }}@${{ secrets.CPANEL_HOST }}:${{ secrets.CPANEL_TARGET_PATH }}
@@ -69,4 +71,5 @@ jobs:
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
+            php artisan event:cache
             php artisan queue:restart || true

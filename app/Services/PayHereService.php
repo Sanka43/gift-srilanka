@@ -28,6 +28,11 @@ class PayHereService
         $this->currency = $currency ?? (string) config('shop.payhere.currency', 'LKR');
     }
 
+    public function isConfigured(): bool
+    {
+        return $this->merchantId !== '' && $this->merchantSecret !== '';
+    }
+
     public function getCheckoutUrl(): string
     {
         return $this->isSandbox ? self::SANDBOX_URL : self::LIVE_URL;
@@ -67,6 +72,10 @@ class PayHereService
      */
     public function generatePaymentData(Order $order): array
     {
+        if (! $this->isConfigured()) {
+            throw new \RuntimeException('PayHere merchant credentials are not configured.');
+        }
+
         $amount = (float) $order->total_amount;
         $formattedAmount = number_format($amount, 2, '.', '');
         $hash = $this->generateCheckoutHash($order->id, $amount, $this->currency);
@@ -107,6 +116,12 @@ class PayHereService
      */
     public function verifyNotification(array $payload): bool
     {
+        // Never verify against an empty secret: md5('') is guessable, so IPNs could be forged.
+        if (! $this->isConfigured()) {
+            Log::error('PayHere IPN rejected: merchant credentials are not configured.');
+            return false;
+        }
+
         $merchantId = (string) ($payload['merchant_id'] ?? '');
         $orderId = (string) ($payload['order_id'] ?? '');
         $payhereAmount = (string) ($payload['payhere_amount'] ?? '');
@@ -116,7 +131,7 @@ class PayHereService
 
         if ($merchantId === '' || $orderId === '' || $receivedMd5Sig === '') {
             Log::warning('PayHere IPN verification failed: missing required fields', [
-                'payload' => $payload,
+                'order_id' => $orderId,
             ]);
             return false;
         }
@@ -139,8 +154,6 @@ class PayHereService
         if (! $matches) {
             Log::warning('PayHere IPN verification failed: signature mismatch', [
                 'order_id' => $orderId,
-                'expected' => $localMd5Sig,
-                'received' => $receivedMd5Sig,
             ]);
         }
 

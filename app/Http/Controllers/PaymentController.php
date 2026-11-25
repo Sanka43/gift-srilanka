@@ -8,6 +8,7 @@ use App\Services\PaymentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
@@ -37,6 +38,13 @@ class PaymentController extends Controller
                 ->with('error', 'This order has been cancelled.');
         }
 
+        if (! $this->payHereService->isConfigured()) {
+            Log::error('PayHere checkout attempted but merchant credentials are not configured.', ['order_id' => $order->id]);
+
+            return redirect()->route('customer.orders.show', $order)
+                ->with('error', 'Online payment is temporarily unavailable. Please contact us.');
+        }
+
         $checkoutUrl = $this->payHereService->getCheckoutUrl();
         $payload = $this->payHereService->generatePaymentData($order);
 
@@ -48,7 +56,11 @@ class PaymentController extends Controller
      */
     public function notify(Request $request): Response
     {
-        Log::info('PayHere IPN Received', ['payload' => $request->all()]);
+        Log::info('PayHere IPN Received', [
+            'order_id' => $request->input('order_id'),
+            'status_code' => $request->input('status_code'),
+            'payment_id' => $request->input('payment_id'),
+        ]);
 
         if (! $this->payHereService->verifyNotification($request->all())) {
             Log::warning('PayHere IPN signature verification failed', [
@@ -59,58 +71,70 @@ class PaymentController extends Controller
         }
 
         $orderId = (int) $request->input('order_id');
-        $order = Order::find($orderId);
-
-        if (! $order) {
-            Log::error('PayHere IPN: Order not found', ['order_id' => $orderId]);
-            return response('Order not found', 404);
-        }
-
         $statusCode = (int) $request->input('status_code');
         $paymentId = (string) $request->input('payment_id');
         $payhereAmount = (float) $request->input('payhere_amount');
 
-        // Check amount tolerance (within 1 cent)
-        $expectedAmount = (float) $order->total_amount;
-        if (abs($expectedAmount - $payhereAmount) > 0.05) {
-            Log::error('PayHere IPN: Amount mismatch', [
-                'order_id' => $order->id,
-                'expected' => $expectedAmount,
-                'received' => $payhereAmount,
-            ]);
-            return response('Amount mismatch', 400);
+        if ((string) $request->input('payhere_currency') !== $this->payHereService->getCurrency()) {
+            Log::error('PayHere IPN: Currency mismatch', ['order_id' => $orderId]);
+            return response('Currency mismatch', 400);
         }
 
-        if ($statusCode === PayHereService::STATUS_SUCCESS) {
-            if ($order->payment_status !== 'paid') {
-                $meta = [
+        // Lock the order row so duplicate/concurrent IPNs are processed one at a time (idempotent).
+        $result = DB::transaction(function () use ($request, $orderId, $statusCode, $paymentId, $payhereAmount) {
+            $order = Order::lockForUpdate()->find($orderId);
+
+            if (! $order) {
+                Log::error('PayHere IPN: Order not found', ['order_id' => $orderId]);
+                return ['Order not found', 404];
+            }
+
+            $expectedAmount = (float) $order->total_amount;
+            if (abs($expectedAmount - $payhereAmount) > 0.01) {
+                Log::error('PayHere IPN: Amount mismatch', [
+                    'order_id' => $order->id,
+                    'expected' => $expectedAmount,
+                    'received' => $payhereAmount,
+                ]);
+                return ['Amount mismatch', 400];
+            }
+
+            // A paid order is final: ignore any later success/failed/cancel notifications.
+            if ($order->payment_status === 'paid') {
+                return ['OK', 200];
+            }
+
+            if ($statusCode === PayHereService::STATUS_SUCCESS) {
+                $this->paymentService->markAsPaid($order, $paymentId, 'payhere', [
                     'payment_id' => $paymentId,
                     'method' => $request->input('method'),
-                    'card_holder_name' => $request->input('card_holder_name'),
-                    'card_no' => $request->input('card_no'),
                     'status_message' => $request->input('status_message'),
                     'ipn_time' => now()->toIso8601String(),
-                ];
+                ]);
 
-                $this->paymentService->markAsPaid($order, $paymentId, 'payhere', $meta);
-
-                Log::info('PayHere IPN: Order marked as paid successfully', [
+                Log::info('PayHere IPN: Order marked as paid', [
                     'order_id' => $order->id,
                     'payment_id' => $paymentId,
                 ]);
+            } elseif (in_array($statusCode, [PayHereService::STATUS_FAILED, PayHereService::STATUS_CANCELED], true)) {
+                $reason = (string) ($request->input('status_message') ?? 'Payment not completed');
+                $this->paymentService->markAsFailed($order, $reason, [
+                    'payment_id' => $paymentId,
+                    'status_code' => $statusCode,
+                    'status_message' => $reason,
+                ]);
+
+                Log::warning('PayHere IPN: Payment failed/cancelled for order', [
+                    'order_id' => $order->id,
+                    'status_code' => $statusCode,
+                    'reason' => $reason,
+                ]);
             }
-        } elseif (in_array($statusCode, [PayHereService::STATUS_FAILED, PayHereService::STATUS_CANCELED], true)) {
-            $reason = (string) ($request->input('status_message') ?? 'Payment not completed');
-            $this->paymentService->markAsFailed($order, $reason, $request->all());
 
-            Log::warning('PayHere IPN: Payment failed/cancelled for order', [
-                'order_id' => $order->id,
-                'status_code' => $statusCode,
-                'reason' => $reason,
-            ]);
-        }
+            return ['OK', 200];
+        });
 
-        return response('OK', 200);
+        return response($result[0], $result[1]);
     }
 
     /**
@@ -126,7 +150,8 @@ class PaymentController extends Controller
 
         // On localhost in Sandbox mode, PayHere cloud servers cannot ping http://localhost IPN directly.
         // Auto-complete payment on return so you can test the full end-to-end UX locally.
-        if ($order->payment_status !== 'paid' && app()->isLocal() && config('shop.payhere.sandbox')) {
+        // Strictly barred from executing in production environments.
+        if ($order->payment_status !== 'paid' && ! app()->isProduction() && app()->isLocal() && config('shop.payhere.sandbox')) {
             $sandboxTxId = 'SANDBOX_' . strtoupper(substr(md5((string) microtime()), 0, 10));
             $this->paymentService->markAsPaid(
                 $order,

@@ -26,7 +26,7 @@ class ProfileService
             if ($user->avatar_path) {
                 Storage::disk('public')->delete($user->avatar_path);
             }
-            $path = $data['avatar']->store('avatars', 'public');
+            $path = app(ImageOptimizer::class)->store($data['avatar'], 'avatars', 400, 82);
             $update['avatar_path'] = str_replace('\\', '/', $path);
         }
 

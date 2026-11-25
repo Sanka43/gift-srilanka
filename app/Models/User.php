@@ -22,7 +22,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'address',
         'district',
         'avatar_path',
-        'role_id',
     ];
 
     protected function casts(): array
@@ -30,6 +29,8 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'blocked_at' => 'datetime',
+            'last_login_at' => 'datetime',
         ];
     }
 
@@ -71,6 +72,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sentMessages(): HasMany
     {
         return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    public function isBlocked(): bool
+    {
+        return $this->blocked_at !== null;
     }
 
     public function isAdmin(): bool

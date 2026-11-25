@@ -19,13 +19,16 @@ class RegistrationService
             ['name' => 'customer']
         );
 
-        return User::create([
+        $user = new User([
             'name' => $payload['name'],
             'email' => $payload['email'],
             'phone' => ! empty($payload['phone']) ? $payload['phone'] : null,
             'password' => Hash::make($payload['password']),
-            'role_id' => $customerRole->id,
         ]);
+        $user->role_id = $customerRole->id;
+        $user->save();
+
+        return $user;
     }
 
     public function sendPostRegistrationNotifications(User $user): void

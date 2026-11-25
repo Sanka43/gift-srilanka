@@ -21,10 +21,18 @@
 {{-- Hero dots follow $heroBackgroundImages; if production looks wrong, redeploy and run: php artisan view:clear --}}
 <section class="relative min-h-[58vh] max-md:min-h-[44vh] max-md:flex max-md:items-end flex items-center overflow-hidden">
     <div class="hero-bg-slides absolute inset-0 z-10 overflow-hidden" aria-hidden="true">
+        {{-- Only the first slide loads immediately; the rest are set after window load to keep first paint fast. --}}
         @foreach ($heroBackgroundImages as $heroBgPath)
             <div class="hero-bg-slide bg-cover bg-center bg-no-repeat max-md:bg-[position:50%_30%]"
-                 style="background-image: url('{{ asset($heroBgPath) }}');"></div>
+                 @if ($loop->first) style="background-image: url('{{ asset($heroBgPath) }}');" @else data-bg="{{ asset($heroBgPath) }}" @endif></div>
         @endforeach
+        <script>
+            window.addEventListener('load', function () {
+                document.querySelectorAll('.hero-bg-slide[data-bg]').forEach(function (el) {
+                    el.style.backgroundImage = "url('" + el.dataset.bg + "')";
+                });
+            });
+        </script>
     </div>
     <div class="absolute inset-0 z-0 pointer-events-none" aria-hidden="true">
         <div class="absolute top-1/4 right-0 w-96 h-96 rounded-full bg-primary-200/10 blur-3xl -translate-y-1/2"></div>

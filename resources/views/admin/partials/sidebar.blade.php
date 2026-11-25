@@ -6,6 +6,7 @@
         ['route' => 'admin.products.index', 'label' => 'Products', 'icon' => 'products'],
         ['route' => 'admin.categories.index', 'label' => 'Categories', 'icon' => 'categories'],
         ['route' => 'admin.customers.index', 'label' => 'Customers', 'icon' => 'customers'],
+        ['route' => 'admin.users.index', 'label' => 'Users & Admins', 'icon' => 'customers'],
         ['route' => 'admin.chats.index', 'label' => 'Chats', 'icon' => 'mail'],
         ['route' => 'admin.contacts.index', 'label' => 'Contacts', 'icon' => 'mail'],
         ['route' => 'admin.reviews.index', 'label' => 'Reviews', 'icon' => 'reviews'],
