@@ -1,4 +1,6 @@
 @import './snow.css';
+@import '@fontsource-variable/dm-sans';
+@import '@fontsource-variable/outfit';
 
 @tailwind base;
 @tailwind components;

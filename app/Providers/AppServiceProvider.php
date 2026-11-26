@@ -95,9 +95,12 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer('layouts.partials.navbar', function ($view) {
             $cartService = app(CartService::class);
-            $items = $cartService->itemsWithProducts();
+            $cartCount = (int) $cartService->count();
 
-            $view->with('cartCount', (int) $cartService->count());
+            // Skip the product/image queries entirely when the cart is empty (most page views).
+            $items = $cartCount > 0 ? $cartService->itemsWithProducts(false) : collect();
+
+            $view->with('cartCount', $cartCount);
             $view->with('cartPreviewItems', $items->take(3));
             $view->with('cartTotal', (float) $items->sum('subtotal'));
 

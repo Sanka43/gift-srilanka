@@ -144,11 +144,11 @@ class CartService
         return (int) $this->getCart()->sum('quantity');
     }
 
-    public function itemsWithProducts(): Collection
+    public function itemsWithProducts(bool $withCategory = true): Collection
     {
         if (auth()->check()) {
             $items = Cart::where('user_id', auth()->id())
-                ->with('product.images', 'product.category')
+                ->with($withCategory ? ['product.images', 'product.category'] : ['product.images'])
                 ->get();
 
             return $items->map(function (Cart $cart) {
@@ -166,7 +166,7 @@ class CartService
 
         $cart = $this->getCart();
         $productIds = $cart->pluck('product_id')->unique()->filter();
-        $products = Product::with('images', 'category')->whereIn('id', $productIds)->get()->keyBy('id');
+        $products = Product::with($withCategory ? ['images', 'category'] : ['images'])->whereIn('id', $productIds)->get()->keyBy('id');
 
         return $cart->map(function ($item) use ($products) {
             $product = $products->get($item['product_id']);

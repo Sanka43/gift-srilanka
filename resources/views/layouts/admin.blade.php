@@ -6,8 +6,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin') | {{ config('app.name') }}</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=dm-sans:400,500,600,700|outfit:500,600,700&display=swap" rel="stylesheet" />
     <script>
         (function() {
             var theme = localStorage.getItem('adminTheme');

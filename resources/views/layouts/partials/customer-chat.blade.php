@@ -7,8 +7,8 @@
         'initials' => auth()->user()->initials(),
         'is_admin' => auth()->user()->isAdmin(),
     ] : null;
-    $chatIconPath = public_path('images/chatbox-icon.png');
-    $chatIconUrl = asset('images/chatbox-icon.png').(is_file($chatIconPath) ? '?v='.filemtime($chatIconPath) : '');
+    $chatIconPath = public_path('images/chatbox-icon.webp');
+    $chatIconUrl = asset('images/chatbox-icon.webp').(is_file($chatIconPath) ? '?v='.filemtime($chatIconPath) : '');
 @endphp
 
 <div

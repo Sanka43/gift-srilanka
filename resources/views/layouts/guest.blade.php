@@ -18,8 +18,6 @@
 
         <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=dm-sans:400,500,600,700|outfit:300,400,500,600,700&display=swap" rel="stylesheet" />
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>

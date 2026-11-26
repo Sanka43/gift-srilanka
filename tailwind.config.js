@@ -13,8 +13,8 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['DM Sans', ...defaultTheme.fontFamily.sans],
-                display: ['Outfit', ...defaultTheme.fontFamily.sans],
+                sans: ['DM Sans Variable', 'DM Sans', ...defaultTheme.fontFamily.sans],
+                display: ['Outfit Variable', 'Outfit', ...defaultTheme.fontFamily.sans],
             },
             borderRadius: {
                 'card': '16px',

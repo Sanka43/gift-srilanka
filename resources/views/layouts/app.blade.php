@@ -31,27 +31,29 @@
 
         <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
-        <!-- Fonts: Outfit (display) + DM Sans (body) -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=dm-sans:400,500,600|outfit:300,400,500,600,700&display=swap" rel="stylesheet" />
+        <!-- Fonts: Outfit + DM Sans are self-hosted via Vite (see resources/css/app.css) -->
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         
         @if(config('contact.google_analytics_id'))
-        <!-- Google tag (gtag.js) -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('contact.google_analytics_id') }}"></script>
+        <!-- Google tag (gtag.js) - loaded after the page is interactive so it never blocks rendering -->
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() { dataLayer.push(arguments); }
+            gtag('js', new Date());
+            gtag('config', '{{ config('contact.google_analytics_id') }}');
 
-            <script>
-                window.dataLayer = window.dataLayer || [];
-                    function gtag() {
-                    dataLayer.push(arguments);
-                }
-
-                gtag('js', new Date());
-
-                gtag('config', '{{ config('contact.google_analytics_id') }}');
-                </script>
+            window.addEventListener('load', function () {
+                var loadGa = function () {
+                    var s = document.createElement('script');
+                    s.async = true;
+                    s.src = 'https://www.googletagmanager.com/gtag/js?id={{ config('contact.google_analytics_id') }}';
+                    document.head.appendChild(s);
+                };
+                if ('requestIdleCallback' in window) { requestIdleCallback(loadGa, { timeout: 3000 }); } else { setTimeout(loadGa, 1500); }
+            });
+        </script>
         @endif
     </head>
     <body class="font-sans antialiased bg-stone-50 overflow-x-hidden @if(request()->routeIs('shop.index')) page-shop @endif @if(request()->routeIs('home')) page-home @endif">

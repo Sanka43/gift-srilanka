@@ -547,8 +547,9 @@ Alpine.data('customerChatWidget', (config) => ({
 
         this.stopCustomerBadgePolling();
         this.customerBadgePollTimer = window.setInterval(() => {
+            if (document.hidden) return;
             this.loadCustomerUnreadCount();
-        }, this.pollingIntervalMs);
+        }, Math.max(this.pollingIntervalMs, 20000));
     },
 
     stopCustomerBadgePolling() {
@@ -591,8 +592,9 @@ Alpine.data('customerChatWidget', (config) => ({
 
         this.stopAdminSummaryPolling();
         this.adminSummaryPollTimer = window.setInterval(() => {
+            if (document.hidden) return;
             this.loadAdminSummary();
-        }, this.pollingIntervalMs);
+        }, Math.max(this.pollingIntervalMs, 15000));
     },
 
     stopAdminSummaryPolling() {
@@ -663,6 +665,7 @@ Alpine.data('customerChatWidget', (config) => ({
         }
 
         this.adminConversationPollTimer = window.setInterval(() => {
+            if (document.hidden) return;
             this.openAdminConversation(conversationId);
         }, this.pollingIntervalMs);
     },
@@ -763,6 +766,7 @@ Alpine.data('customerChatWidget', (config) => ({
         }
 
         this.pollTimer = window.setInterval(async () => {
+            if (document.hidden) return;
             try {
                 const { data } = await window.axios.get(this.endpoints.conversation, {
                     headers: { Accept: 'application/json' },
@@ -963,7 +967,7 @@ Alpine.data('adminChatPanel', (config) => ({
 
     startListPolling() {
         this.stopListPolling();
-        this.listPollTimer = window.setInterval(() => this.refreshConversationList(), this.pollingIntervalMs || 5000);
+        this.listPollTimer = window.setInterval(() => { if (!document.hidden) this.refreshConversationList(); }, this.pollingIntervalMs || 5000);
     },
 
     stopListPolling() {
@@ -1020,6 +1024,7 @@ Alpine.data('adminChatPanel', (config) => ({
 
         if (!subscribed && conversationId) {
             this.conversationPollTimer = window.setInterval(() => {
+                if (document.hidden) return;
                 this.selectConversation(conversationId, { preserveUrl: true });
             }, this.pollingIntervalMs || 5000);
         }
