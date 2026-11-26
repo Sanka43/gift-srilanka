@@ -30,12 +30,18 @@ class CartController extends Controller
         if (! auth()->check()) {
             $quantity = (int) $request->validated('quantity', 1);
             $quantity = max(1, min(99, $quantity));
+            $buyNow = $request->input('redirect') === 'checkout' || $request->boolean('buy_now');
             session()->put('pending_cart_item', [
                 'product_id' => $product->id,
                 'quantity' => $quantity,
+                'buy_now' => $buyNow,
             ]);
-            return redirect()->route('register')
-                ->with('info', 'Please register to add items to cart.');
+            if ($buyNow) {
+                // After login/register (incl. Google), send the customer straight to checkout.
+                session()->put('url.intended', route('checkout.index'));
+            }
+            return redirect()->route($buyNow ? 'login' : 'register')
+                ->with('info', $buyNow ? 'Please log in or register to complete your purchase.' : 'Please register to add items to cart.');
         }
 
         $quantity = (int) $request->validated('quantity', 1);

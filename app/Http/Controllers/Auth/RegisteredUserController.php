@@ -49,6 +49,12 @@ class RegisteredUserController extends Controller
             }
         }
 
+        if (! empty($pendingCartItem['buy_now'])) {
+            session()->forget('url.intended');
+
+            return redirect()->route('checkout.index')->with('status', 'Account created. You are logged in.');
+        }
+
         return redirect()->route('home')->with('status', 'Account created. You are logged in.');
     }
 }
