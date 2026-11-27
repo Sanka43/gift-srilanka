@@ -47,11 +47,6 @@ class PageController extends Controller
         return view('pages.privacy');
     }
 
-    public function dashboard(): View
-    {
-        return view('dashboard');
-    }
-
     public function robots(): Response
     {
         $url = rtrim(config('app.url'), '/');

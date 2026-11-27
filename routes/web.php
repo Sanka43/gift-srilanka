@@ -30,9 +30,7 @@ Route::get('/sitemap.xml', App\Http\Controllers\SitemapController::class)->name(
 
 Route::get('/robots.txt', [PageController::class, 'robots'])->name('robots');
 
-Route::get('/dashboard', [PageController::class, 'dashboard'])
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+Route::get('/dashboard', fn () => redirect()->route('home'))->name('dashboard');
 
 // Shop (public)
 Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
